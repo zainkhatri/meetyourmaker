@@ -2,16 +2,18 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 
+// Firebase configuration should come from environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyB3DDOHH9tqjxP7_omG0R5an929riU22ZY",
-  authDomain: "meetyourmaker-zain.firebaseapp.com",
-  projectId: "meetyourmaker-zain",
-  storageBucket: "meetyourmaker-zain.firebasestorage.app",
-  messagingSenderId: "557837382932",
-  appId: "1:557837382932:web:c032a0c69bc928f6133e01",
-  measurementId: "G-MLZJF1NLSE"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const analytics = getAnalytics(app);
