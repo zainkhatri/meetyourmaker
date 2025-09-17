@@ -33,8 +33,25 @@ const ChatInterface = () => {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [mode, setMode] = useState<'professional' | 'casual'>('casual');
+  const [mode, setMode] = useState<'professional' | 'casual'>('professional');
   const [samples, setSamples] = useState<WritingSample[]>([]);
+
+  // Helper for a mode-specific greeting
+  const modeGreeting = (m: 'professional' | 'casual') =>
+    m === 'professional'
+      ? "hello — how can I assist you today?"
+      : "hey, what's up! i'm zain";
+
+  // Set a friendly, mode-specific default greeting once on initial mount
+  useEffect(() => {
+    setMessages([
+      {
+        role: 'assistant',
+        content: modeGreeting(mode),
+      },
+    ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const fetchSamples = async () => {
@@ -60,6 +77,22 @@ const ChatInterface = () => {
 
     fetchSamples();
   }, [mode]);
+
+  // If the user switches modes and there is no real conversation yet, refresh the greeting
+  useEffect(() => {
+    const onlyGreeting =
+      messages.length === 0 ||
+      (messages.length === 1 && messages[0].role === 'assistant');
+    if (onlyGreeting) {
+      setMessages([
+        {
+          role: 'assistant',
+          content: modeGreeting(mode),
+        },
+      ]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, messages.length]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
