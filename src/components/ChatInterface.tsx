@@ -29,12 +29,16 @@ interface WritingSample {
 }
 
 const ChatInterface = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messagesByMode, setMessagesByMode] = useState<{
+    professional: Message[];
+    casual: Message[];
+  }>({ professional: [], casual: [] });
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [mode, setMode] = useState<'professional' | 'casual'>('professional');
-  const [samples, setSamples] = useState<WritingSample[]>([]);
+  const [styleSamples, setStyleSamples] = useState<WritingSample[]>([]);
+  const [knowledgeSamples, setKnowledgeSamples] = useState<WritingSample[]>([]);
 
   // Helper for a mode-specific greeting
   const modeGreeting = (m: 'professional' | 'casual') =>
@@ -44,12 +48,12 @@ const ChatInterface = () => {
 
   // Set a friendly, mode-specific default greeting once on initial mount
   useEffect(() => {
-    setMessages([
-      {
-        role: 'assistant',
-        content: modeGreeting(mode),
-      },
-    ]);
+    setMessagesByMode(prev => ({
+      ...prev,
+      [mode]: prev[mode].length === 0
+        ? [{ role: 'assistant', content: modeGreeting(mode) }]
+        : prev[mode],
+    }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -57,18 +61,32 @@ const ChatInterface = () => {
     const fetchSamples = async () => {
       try {
         console.log('Fetching samples for mode:', mode);
-        const samplesQuery = query(
-          collection(db, 'knowledge_chunks'),
-          where('type', '==', mode)
-        );
-        const snapshot = await getDocs(samplesQuery);
-        const fetchedSamples = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as WritingSample[];
-        
-        console.log(`Fetched ${fetchedSamples.length} ${mode} samples:`, fetchedSamples);
-        setSamples(fetchedSamples);
+
+        // Helper to safely fetch a collection; returns [] if it doesn't exist
+        const safeFetchAll = async (colName: string) => {
+          try {
+            const snap = await getDocs(collection(db, colName));
+            return snap.docs.map(d => ({ id: d.id, ...d.data() })) as WritingSample[];
+          } catch (e) {
+            console.warn(`Collection ${colName} not found or unreadable`, e);
+            return [] as WritingSample[];
+          }
+        };
+
+        if (mode === 'professional') {
+          // Professional: knowledge + style from knowledge_chunks (type=professional)
+          const profQ = query(collection(db, 'knowledge_chunks'), where('type', '==', 'professional'));
+          const profSnap = await getDocs(profQ);
+          const profSamples = profSnap.docs.map(d => ({ id: d.id, ...d.data() })) as WritingSample[];
+          setStyleSamples(profSamples);
+          setKnowledgeSamples(profSamples);
+        } else {
+          // Casual: knowledge from both knowledge_chunks and RAW; style from RAW
+          const kcAll = await safeFetchAll('knowledge_chunks');
+          const rawAll = await safeFetchAll('RAW');
+          setKnowledgeSamples([...(kcAll || []), ...(rawAll || [])]);
+          setStyleSamples(rawAll || []);
+        }
       } catch (error) {
         console.error('Error fetching samples:', error);
         setError('Unable to load writing samples. Please try again.');
@@ -80,19 +98,16 @@ const ChatInterface = () => {
 
   // If the user switches modes and there is no real conversation yet, refresh the greeting
   useEffect(() => {
-    const onlyGreeting =
-      messages.length === 0 ||
-      (messages.length === 1 && messages[0].role === 'assistant');
+    const msgs = messagesByMode[mode] || [];
+    const onlyGreeting = msgs.length === 0 || (msgs.length === 1 && msgs[0].role === 'assistant');
     if (onlyGreeting) {
-      setMessages([
-        {
-          role: 'assistant',
-          content: modeGreeting(mode),
-        },
-      ]);
+      setMessagesByMode(prev => ({
+        ...prev,
+        [mode]: [{ role: 'assistant', content: modeGreeting(mode) }],
+      }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, messages.length]);
+  }, [mode, messagesByMode.professional.length, messagesByMode.casual.length]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,27 +118,40 @@ const ChatInterface = () => {
     setLoading(true);
     setError('');
 
-    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setMessagesByMode(prev => ({
+      ...prev,
+      [mode]: [...(prev[mode] || []), { role: 'user', content: userMessage }],
+    }));
 
     try {
-      if (samples.length === 0) {
-        throw new Error('No writing samples available for this mode');
-      }
-
-      const context = samples
+      const styleContext = styleSamples
+        .map(sample => `${sample.content}\nContext: ${sample.context}`)
+        .join('\n\n');
+      const knowledgeContext = knowledgeSamples
         .map(sample => `${sample.content}\nContext: ${sample.context}`)
         .join('\n\n');
 
-      console.log(`Generating response using ${samples.length} ${mode} samples`);
+      console.log(`Generating response using style=${styleSamples.length}, knowledge=${knowledgeSamples.length} for mode=${mode}`);
+
+      const currentMessages = messagesByMode[mode] || [];
+      const styleBlock =
+        styleSamples.length > 0
+          ? `Here are examples of Zain's ${mode} writing style:\n\n${styleContext}`
+          : `There are currently no saved style examples for this mode. Rely strictly on the baseline persona and maintain a ${mode} tone.`;
+
+      const knowledgeBlock =
+        knowledgeSamples.length > 0
+          ? `Use the following knowledge/context when relevant (do not quote verbatim unless asked):\n\n${knowledgeContext}`
+          : '';
 
       const response = await openai.chat.completions.create({
         model: "gpt-4",
         messages: [
           {
             role: "system",
-            content: `${getPersonaPrompt(mode)}\n\nHere are examples of Zain's ${mode} writing style:\n\n${context}\n\nImportant instructions:\n1. Study these examples carefully - they show Zain's actual ${mode} style\n2. Match the tone, vocabulary, and sentence structure exactly\n3. Keep responses natural and ${mode === 'professional' ? 'professional' : 'conversational'}\n4. Never mention that you're an AI or that you're mimicking a style\n5. Stay true to your baseline identity while responding in your ${mode} style`
+            content: `${getPersonaPrompt(mode)}\n\n${styleBlock}\n\n${knowledgeBlock}\n\nCritical constraints:\n- Do NOT invent biography details (age, school, city, title) unless present in style or knowledge data.\n- If asked about unknown personal details, reply briefly that it's not available.\n- Keep tone ${mode === 'professional' ? 'professional' : 'casual'} and consistent with style examples.`
           },
-          ...messages.map(msg => ({
+          ...currentMessages.map(msg => ({
             role: msg.role,
             content: msg.content
           })),
@@ -137,7 +165,10 @@ const ChatInterface = () => {
 
       const aiResponse = response.choices[0].message.content;
       if (aiResponse) {
-        setMessages(prev => [...prev, { role: 'assistant', content: aiResponse }]);
+        setMessagesByMode(prev => ({
+          ...prev,
+          [mode]: [...(prev[mode] || []), { role: 'assistant', content: aiResponse }],
+        }));
       }
     } catch (err) {
       console.error('Error generating response:', err);
@@ -237,7 +268,7 @@ const ChatInterface = () => {
         }}
       >
         <List sx={{ p: 3 }}>
-          {messages.map((message, index) => (
+          {(messagesByMode[mode] || []).map((message, index) => (
             <ListItem
               key={index}
               sx={{

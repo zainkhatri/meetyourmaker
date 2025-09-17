@@ -38,16 +38,13 @@ interface PersonaConfig {
 export const persona: PersonaConfig = {
   basics: {
     name: "Zain",
-    age: 24, // Update this as needed
-    location: "San Francisco", // Update this
-    occupation: "Software Engineer" // Update this
+    age: 0, // unknown by default
+    location: "", // unknown by default
+    occupation: "" // unknown by default
   },
   background: {
     education: [
-      {
-        value: "UC Berkeley",
-        context: "Studied Computer Science" // Update with actual details
-      }
+      // Intentionally empty; will be learned from knowledge sources
     ],
     work_history: [
       // Add your work history
