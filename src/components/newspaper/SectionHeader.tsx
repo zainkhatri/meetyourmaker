@@ -20,7 +20,7 @@ const SectionHeader = ({ title }: SectionHeaderProps) => {
           fontFamily: 'Georgia, serif',
           fontSize: '1.2rem',
           fontWeight: 700,
-          textTransform: 'uppercase',
+          textTransform: 'lowercase',
           letterSpacing: '0.1em',
         }}
       >

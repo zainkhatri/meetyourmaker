@@ -24,20 +24,23 @@ const Article = ({ content, byline, date }: ArticleProps) => {
           {byline && (
             <Typography
               sx={{
-                fontFamily: 'Arial, sans-serif',
+                fontFamily: 'Playfair Display, Georgia, serif',
                 fontSize: '0.9rem',
                 color: 'rgba(255,255,255,0.7)',
+                fontStyle: 'italic',
+                textTransform: 'lowercase'
               }}
             >
-              By {byline}
+              {byline}
             </Typography>
           )}
           {date && (
             <Typography
               sx={{
-                fontFamily: 'Arial, sans-serif',
+                fontFamily: 'Playfair Display, Georgia, serif',
                 fontSize: '0.9rem',
                 color: 'rgba(255,255,255,0.7)',
+                fontStyle: 'italic'
               }}
             >
               {date}
@@ -48,7 +51,7 @@ const Article = ({ content, byline, date }: ArticleProps) => {
       <Typography
         component="article"
         sx={{
-          fontFamily: 'Georgia, serif',
+          fontFamily: 'Playfair Display, Georgia, serif',
           fontSize: '1.1rem',
           lineHeight: 1.6,
           '& > span:first-of-type': {
@@ -56,7 +59,7 @@ const Article = ({ content, byline, date }: ArticleProps) => {
             fontSize: '4rem',
             lineHeight: 0.8,
             paddingRight: '8px',
-            fontFamily: 'Georgia, serif',
+            fontFamily: 'Playfair Display, Georgia, serif',
             fontWeight: 700,
           },
         }}

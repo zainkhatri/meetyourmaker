@@ -24,9 +24,9 @@ const Headline = ({ main, subheading, size = 'medium' }: HeadlineProps) => {
 
   return (
     <Box sx={{ 
-      borderBottom: '2px solid rgba(255,255,255,0.1)',
-      mb: 3,
-      pb: 2
+      borderBottom: subheading ? 'none' : '2px solid rgba(255,255,255,0.1)',
+      mb: subheading ? 1 : 3,
+      pb: subheading ? 0 : 2
     }}>
       <Typography
         component="h1"
@@ -34,7 +34,7 @@ const Headline = ({ main, subheading, size = 'medium' }: HeadlineProps) => {
           fontFamily: 'Georgia, serif',
           fontWeight: 700,
           ...sizes[size],
-          textTransform: 'uppercase',
+          textTransform: 'lowercase',
           letterSpacing: '0.02em',
           mb: subheading ? 1 : 0,
         }}
@@ -48,6 +48,7 @@ const Headline = ({ main, subheading, size = 'medium' }: HeadlineProps) => {
             fontSize: '1.2rem',
             fontStyle: 'italic',
             color: 'rgba(255,255,255,0.7)',
+            textTransform: 'lowercase',
           }}
         >
           {subheading}
@@ -58,7 +59,3 @@ const Headline = ({ main, subheading, size = 'medium' }: HeadlineProps) => {
 };
 
 export default Headline;
-
-
-
-

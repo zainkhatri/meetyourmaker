@@ -8,17 +8,10 @@ interface ColumnProps {
 }
 
 const Column = ({ children, width = 1, withDivider = true }: ColumnProps) => {
-  const widthMap = {
-    1: '25%',
-    2: '50%',
-    3: '75%',
-    4: '100%',
-  };
-
   return (
     <Box
       sx={{
-        width: widthMap[width],
+        width: { xs: '100%', md: width === 3 ? '75%' : '25%' },
         px: 3,
         position: 'relative',
         '&::after': withDivider ? {
@@ -29,6 +22,7 @@ const Column = ({ children, width = 1, withDivider = true }: ColumnProps) => {
           height: '90%',
           width: '1px',
           backgroundColor: 'rgba(255,255,255,0.1)',
+          display: { xs: 'none', md: 'block' }
         } : {},
       }}
     >
@@ -38,4 +32,3 @@ const Column = ({ children, width = 1, withDivider = true }: ColumnProps) => {
 };
 
 export default Column;
-

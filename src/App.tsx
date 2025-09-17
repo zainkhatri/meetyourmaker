@@ -1,7 +1,7 @@
 import { ThemeProvider, createTheme } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { Container, Box, Button, Avatar } from '@mui/material';
+import { Box, Button, Avatar, Typography, Divider } from '@mui/material';
 import ChatInterface from './components/ChatInterface';
 import Admin from './pages/Admin';
 import Headline from './components/newspaper/Headline';
@@ -9,6 +9,8 @@ import Column from './components/newspaper/Column';
 import Article from './components/newspaper/Article';
 import SectionHeader from './components/newspaper/SectionHeader';
 import PullQuote from './components/newspaper/PullQuote';
+import PhotoStory from './components/newspaper/PhotoStory';
+import { analytics } from './config/firebase';
 
 const theme = createTheme({
   palette: {
@@ -36,84 +38,182 @@ function App() {
           minHeight: '100vh',
           background: '#121212',
           pt: 4,
-          pb: 8
+          pb: 8,
+          px: { xs: 2, sm: 3, md: 4 }
         }}>
-          <Container maxWidth="lg">
+          <Box sx={{ 
+            backgroundColor: '#1a1a1a',
+            width: '100%',
+            position: 'relative',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '8px',
+              background: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.1) 0px, rgba(255,255,255,0.1) 2px, transparent 2px, transparent 10px)'
+            }
+          }}>
+            {/* Newspaper Header */}
             <Box sx={{ 
-              backgroundColor: '#1a1a1a',
-              p: 4,
+              borderBottom: '1px solid rgba(255,255,255,0.1)',
+              background: '#161616'
             }}>
-              {/* Masthead */}
               <Box sx={{ 
-                textAlign: 'center',
-                borderBottom: '4px double rgba(255,255,255,0.1)',
-                mb: 4,
-                pb: 3
+                textAlign: 'center', 
+                pt: 4,
+                px: { xs: 2, sm: 3, md: 4 },
               }}>
-                <Headline
-                  main="meetyourmaker"
-                  subheading="chat with zain's digital consciousness"
-                  size="large"
-                />
+                <Typography 
+                  sx={{ 
+                    fontSize: '0.8rem',
+                    letterSpacing: '0.2em',
+                    color: 'rgba(255,255,255,0.6)',
+                    mb: 1,
+                    fontFamily: 'Georgia, serif',
+                    textTransform: 'uppercase'
+                  }}
+                >
+                  established 2025 • vol. 1 • no. 1
+                </Typography>
+                
+                <Box sx={{ 
+                  borderBottom: '4px double rgba(255,255,255,0.1)',
+                  borderTop: '4px double rgba(255,255,255,0.1)',
+                  py: 3,
+                  my: 2
+                }}>
+                  <Typography 
+                    variant="h1" 
+                    sx={{ 
+                      fontFamily: 'Playfair Display, Georgia, serif',
+                      fontSize: { xs: '3rem', md: '4.5rem' },
+                      fontWeight: 900,
+                      letterSpacing: '-0.02em',
+                      mb: 2,
+                      textTransform: 'lowercase'
+                    }}
+                  >
+                    meetyourmaker
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontFamily: 'Georgia, serif',
+                      fontSize: '1.2rem',
+                      fontStyle: 'italic',
+                      color: 'rgba(255,255,255,0.7)',
+                      borderTop: '1px solid rgba(255,255,255,0.1)',
+                      borderBottom: '1px solid rgba(255,255,255,0.1)',
+                      py: 1,
+                      mx: 'auto',
+                      maxWidth: '600px'
+                    }}
+                  >
+                    chat with zain
+                  </Typography>
+                </Box>
+
                 <Box sx={{ 
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  mt: 2,
+                  borderBottom: '1px solid rgba(255,255,255,0.1)',
+                  pb: 2,
                   color: 'rgba(255,255,255,0.7)',
                   fontFamily: 'Georgia, serif'
                 }}>
-                  <a 
-                    href="https://zainkhatri.com" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    style={{ color: 'inherit', textDecoration: 'none' }}
+                  <Box sx={{ 
+                    display: 'flex', 
+                    gap: 2,
+                    '& > a': {
+                      color: 'inherit',
+                      textDecoration: 'none',
+                      fontSize: '0.9rem',
+                      letterSpacing: '0.05em',
+                      fontStyle: 'italic',
+                      '&:hover': {
+                        color: 'white'
+                      }
+                    }
+                  }}>
+                    <a href="https://zainkhatri.com" target="_blank" rel="noopener noreferrer">
+                      zainkhatri.com
+                    </a>
+                    <span>•</span>
+                    <a href="https://github.com/zainkhatri" target="_blank" rel="noopener noreferrer">
+                      @zainkhatri
+                    </a>
+                  </Box>
+                  <Typography 
+                    sx={{ 
+                      fontStyle: 'italic',
+                      fontSize: '0.9rem',
+                      letterSpacing: '0.05em'
+                    }}
                   >
-                    zainkhatri.com
-                  </a>
-                  <span>{currentDate}</span>
-                  <a 
-                    href="https://github.com/zainkhatri" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    style={{ color: 'inherit', textDecoration: 'none' }}
-                  >
-                    @zainkhatri
-                  </a>
+                    {currentDate}
+                  </Typography>
                 </Box>
               </Box>
+            </Box>
 
+            {/* Main Content */}
+            <Box sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
               <Routes>
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/" element={
-                  <Box sx={{ display: 'flex' }}>
-                    {/* Main Content - 3 columns */}
+                  <Box sx={{ 
+                    display: 'flex',
+                    flexDirection: { xs: 'column', md: 'row' },
+                    gap: { xs: 4, md: 0 }
+                  }}>
+                    {/* Main Column */}
                     <Column width={3}>
                       <Box sx={{ 
                         display: 'flex', 
-                        alignItems: 'center', 
+                        alignItems: { xs: 'center', md: 'flex-start' },
+                        flexDirection: { xs: 'column', md: 'row' },
                         gap: 3, 
-                        mb: 4 
+                        mb: 4,
+                        borderBottom: '2px solid rgba(255,255,255,0.1)',
+                        pb: 4
                       }}>
                         <Avatar 
-                          src="https://avatars.githubusercontent.com/u/zainkhatri" 
+                          src="/hero.JPG" 
                           sx={{ 
-                            width: 120, 
-                            height: 120,
+                            width: { xs: 100, md: 120 }, 
+                            height: { xs: 100, md: 120 },
                             border: '3px solid rgba(255,255,255,0.1)'
                           }}
                         />
-                        <Box>
-                          <Headline
-                            main="Chat with Zain's AI"
-                            subheading="UCSD Alumni • Software & ML Engineer • NASA Researcher"
-                            size="medium"
-                          />
+                        <Box sx={{ textAlign: { xs: 'center', md: 'left' } }}>
+                          <Typography
+                            sx={{
+                              fontFamily: 'Playfair Display, Georgia, serif',
+                              fontSize: '2rem',
+                              fontWeight: 700,
+                              mb: 1,
+                              textTransform: 'lowercase'
+                            }}
+                          >
+                            zain khatri
+                          </Typography>
+                          <Typography
+                            sx={{
+                              fontFamily: 'Georgia, serif',
+                              fontSize: '1rem',
+                              color: 'rgba(255,255,255,0.7)',
+                              fontStyle: 'italic'
+                            }}
+                          >
+                            ucsd alumni • software & ml engineer • nasa researcher
+                          </Typography>
                         </Box>
                       </Box>
                       <Article
                         content="Experience direct communication with an AI system trained on Zain Khatri's writing style and thought patterns. This unique interface allows you to interact with a digital consciousness that mirrors Zain's communication style, whether in professional contexts or casual conversations. As a Software Engineer and Machine Learning researcher who's worked at NASA Ames, Zain's digital echo maintains his technical expertise while preserving his personal voice."
-                        byline="Digital Consciousness Interface"
+                        byline="author: zain khatri"
                         date={currentDate}
                       />
                       <Box sx={{ mb: 4 }}>
@@ -121,36 +221,94 @@ function App() {
                       </Box>
                     </Column>
 
-                    {/* Sidebar - 1 column */}
+                    {/* Sidebar */}
                     <Column width={1} withDivider={false}>
-                      <SectionHeader title="About Zain" />
-                      <PullQuote
-                        quote="A UCSD graduate with a focus in Machine Learning and Cognitive Science, bringing technical expertise from NASA and a passion for innovative AI solutions."
-                        attribution="Background"
-                      />
-                      <Article
-                        content="The system maintains Zain's dual communication modes: his professional voice honed through research and engineering work, and his casual tone from everyday interactions. Each response is crafted to authentically represent his communication style, creating a genuine digital extension of his personality."
-                        byline="System Architecture"
-                      />
-                      <Box sx={{ mt: 4, textAlign: 'center' }}>
-                        <Button
-                          component={Link}
-                          to={window.location.pathname === '/admin' ? '/' : '/admin'}
-                          variant="outlined"
-                          sx={{
-                            fontFamily: 'Georgia, serif',
-                            textTransform: 'none',
-                          }}
-                        >
-                          {window.location.pathname === '/admin' ? 'return to chat' : 'configure system'}
-                        </Button>
+                      <Box sx={{
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        p: 3,
+                        backgroundColor: 'rgba(26,26,26,0.5)',
+                        position: 'relative',
+                        '&::before': {
+                          content: '""',
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          height: '4px',
+                          background: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.1) 0px, rgba(255,255,255,0.1) 1px, transparent 1px, transparent 5px)'
+                        }
+                      }}>
+                        <SectionHeader title="about zain" />
+                        <PullQuote
+                          quote="you may be asking, why would i want to talk to zain when it's not zain? that's a good point. if i'm being honest, i just wanted to talk to myself and see if the response was accurate or not :)"
+                          attribution="zain"
+                        />
+                        <Divider sx={{ 
+                          my: 3, 
+                          borderStyle: 'dashed',
+                          borderColor: 'rgba(255,255,255,0.1)' 
+                        }} />
+                        <Article
+                          content="The system maintains Zain's dual communication modes: his professional voice honed through research and engineering work, and his casual tone from everyday interactions. Each response is crafted to authentically represent his communication style, creating a genuine digital extension of his personality."
+                          byline="system architecture"
+                        />
+                        <Divider sx={{ 
+                          my: 3, 
+                          borderStyle: 'dashed',
+                          borderColor: 'rgba(255,255,255,0.1)' 
+                        }} />
+                        <SectionHeader title="in pictures" />
+                        <PhotoStory 
+                          images={[
+                            {
+                              src: "/1.JPG",
+                              caption: "graduation day at university of california san diego, studying cognitive science and machine learning",
+                              width: "full"
+                            },
+                            {
+                              src: "/2.JPG",
+                              caption: "zain khatri (left) with colleague at muslim tech collaborative, a club he founded",
+                              width: "half"
+                            },
+                            {
+                              src: "/3.JPG",
+                              caption: "nasa ames research center, where zain works on ai and robotics",
+                              width: "half"
+                            },
+                            {
+                              src: "/4.JPG",
+                              caption: "sunset in evergreen, the hometown where it all began",
+                              width: "full"
+                            }
+                          ]} 
+                        />
+                        <Box sx={{ mt: 4, textAlign: 'center' }}>
+                          <Button
+                            component={Link}
+                            to={window.location.pathname === '/admin' ? '/' : '/admin'}
+                            variant="outlined"
+                            sx={{
+                              fontFamily: 'Georgia, serif',
+                              textTransform: 'none',
+                              borderColor: 'rgba(255,255,255,0.2)',
+                              borderStyle: 'double',
+                              borderWidth: '3px',
+                              '&:hover': {
+                                borderColor: 'rgba(255,255,255,0.4)',
+                                backgroundColor: 'rgba(255,255,255,0.05)'
+                              }
+                            }}
+                          >
+                            {window.location.pathname === '/admin' ? 'return to chat' : 'configure system'}
+                          </Button>
+                        </Box>
                       </Box>
                     </Column>
                   </Box>
                 } />
               </Routes>
             </Box>
-          </Container>
+          </Box>
         </Box>
       </Router>
     </ThemeProvider>

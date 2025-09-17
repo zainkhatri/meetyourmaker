@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Box, 
   TextField, 
@@ -15,7 +15,6 @@ import { collection, query, getDocs, where } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import openai from '../config/openai';
 import { getPersonaPrompt } from '../config/persona';
-import SectionHeader from './newspaper/SectionHeader';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -36,11 +35,11 @@ const ChatInterface = () => {
   const [error, setError] = useState('');
   const [mode, setMode] = useState<'professional' | 'casual'>('casual');
   const [samples, setSamples] = useState<WritingSample[]>([]);
-  const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchSamples = async () => {
       try {
+        console.log('Fetching samples for mode:', mode);
         const samplesQuery = query(
           collection(db, 'knowledge_chunks'),
           where('type', '==', mode)
@@ -50,26 +49,17 @@ const ChatInterface = () => {
           id: doc.id,
           ...doc.data()
         })) as WritingSample[];
+        
+        console.log(`Fetched ${fetchedSamples.length} ${mode} samples:`, fetchedSamples);
         setSamples(fetchedSamples);
-
-        setMessages([{
-          role: 'assistant',
-          content: mode === 'professional' ? 
-            "How may I assist you today?" :
-            "Hey! What's on your mind?"
-        }]);
       } catch (error) {
         console.error('Error fetching samples:', error);
-        setError('Unable to connect. Please try again.');
+        setError('Unable to load writing samples. Please try again.');
       }
     };
 
     fetchSamples();
   }, [mode]);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,16 +73,22 @@ const ChatInterface = () => {
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
 
     try {
+      if (samples.length === 0) {
+        throw new Error('No writing samples available for this mode');
+      }
+
       const context = samples
         .map(sample => `${sample.content}\nContext: ${sample.context}`)
         .join('\n\n');
+
+      console.log(`Generating response using ${samples.length} ${mode} samples`);
 
       const response = await openai.chat.completions.create({
         model: "gpt-4",
         messages: [
           {
             role: "system",
-            content: `${getPersonaPrompt(mode)}\n\nHere are examples of your ${mode} writing style:\n\n${context}\n\nImportant instructions:\n1. Study these examples carefully - they show your actual ${mode} style\n2. Match the tone, vocabulary, and sentence structure exactly\n3. Keep responses natural and ${mode === 'professional' ? 'professional' : 'conversational'}\n4. Never mention that you're an AI or that you're mimicking a style\n5. Stay true to your baseline identity while responding in your ${mode} style`
+            content: `${getPersonaPrompt(mode)}\n\nHere are examples of Zain's ${mode} writing style:\n\n${context}\n\nImportant instructions:\n1. Study these examples carefully - they show Zain's actual ${mode} style\n2. Match the tone, vocabulary, and sentence structure exactly\n3. Keep responses natural and ${mode === 'professional' ? 'professional' : 'conversational'}\n4. Never mention that you're an AI or that you're mimicking a style\n5. Stay true to your baseline identity while responding in your ${mode} style`
           },
           ...messages.map(msg => ({
             role: msg.role,
@@ -112,7 +108,7 @@ const ChatInterface = () => {
       }
     } catch (err) {
       console.error('Error generating response:', err);
-      setError('Failed to generate response. Please try again.');
+      setError(err instanceof Error ? err.message : 'Failed to generate response. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -123,26 +119,41 @@ const ChatInterface = () => {
       <Box sx={{ 
         mb: 4, 
         display: 'flex', 
-        flexDirection: 'column', 
         alignItems: 'center',
+        justifyContent: 'space-between',
+        borderTop: '1px solid rgba(255,255,255,0.1)',
+        borderBottom: '1px solid rgba(255,255,255,0.1)',
+        py: 2
       }}>
-        <SectionHeader title={mode === 'professional' ? 'Professional Discourse' : 'Casual Conversation'} />
+        <Typography
+          sx={{
+            fontFamily: 'Playfair Display, Georgia, serif',
+            fontSize: '1.5rem',
+            textTransform: 'lowercase',
+            letterSpacing: '0.02em'
+          }}
+        >
+          {mode === 'professional' ? 'professional discourse' : 'casual conversation'}
+        </Typography>
         <ToggleButtonGroup
           value={mode}
           exclusive
           onChange={(e, newValue) => {
             if (newValue !== null) {
               setMode(newValue);
+              setError('');
             }
           }}
           sx={{
-            mt: 2,
             '& .MuiToggleButton-root': {
               fontFamily: 'Georgia, serif',
               color: 'rgba(255,255,255,0.7)',
               borderColor: 'rgba(255,255,255,0.1)',
               px: 3,
               py: 1,
+              textTransform: 'lowercase',
+              fontSize: '0.9rem',
+              letterSpacing: '0.02em',
               '&.Mui-selected': {
                 backgroundColor: 'rgba(255,255,255,0.1)',
                 color: 'white',
@@ -151,10 +162,10 @@ const ChatInterface = () => {
           }}
         >
           <ToggleButton value="professional">
-            Professional
+            professional
           </ToggleButton>
           <ToggleButton value="casual">
-            Casual
+            casual
           </ToggleButton>
         </ToggleButtonGroup>
       </Box>
@@ -235,11 +246,10 @@ const ChatInterface = () => {
                   fontStyle: 'italic',
                 }}
               >
-                Composing response...
+                composing response...
               </Typography>
             </ListItem>
           )}
-          <div ref={messagesEndRef} />
         </List>
       </Paper>
 
@@ -258,7 +268,9 @@ const ChatInterface = () => {
           fullWidth
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Your inquiry..."
+          placeholder={mode === 'professional' ? 
+            "Enter your professional inquiry..." : 
+            "What's on your mind?"}
           disabled={loading}
           sx={{
             '& .MuiOutlinedInput-root': {
@@ -283,6 +295,7 @@ const ChatInterface = () => {
           endIcon={<SendIcon />}
           sx={{
             fontFamily: 'Georgia, serif',
+            textTransform: 'lowercase',
             borderColor: 'rgba(255,255,255,0.2)',
             '&:hover': {
               borderColor: 'rgba(255,255,255,0.4)',
@@ -290,7 +303,7 @@ const ChatInterface = () => {
             },
           }}
         >
-          Submit
+          send
         </Button>
       </Paper>
     </Box>
