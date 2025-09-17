@@ -257,7 +257,7 @@ function App() {
                           borderStyle: 'dashed',
                           borderColor: 'rgba(255,255,255,0.1)' 
                         }} />
-                        <SectionHeader title="in pictures" />
+                        <SectionHeader title="visual chronicle" />
                         <PhotoStory 
                           images={[
                             {

@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Divider } from '@mui/material';
 
 interface PhotoStoryProps {
   images: {
@@ -11,63 +11,87 @@ interface PhotoStoryProps {
 const PhotoStory = ({ images }: PhotoStoryProps) => {
   return (
     <Box sx={{ 
-      my: 4,
-      p: 2,
+      my: 3,
+      p: 2.5,
       border: '1px solid rgba(255,255,255,0.1)',
       backgroundColor: 'rgba(26,26,26,0.5)',
     }}>
-      <Typography
-        sx={{
-          fontFamily: 'Georgia, serif',
-          fontSize: '0.9rem',
-          textTransform: 'uppercase',
-          letterSpacing: '0.1em',
-          mb: 2,
-          pb: 1,
-          borderBottom: '1px solid rgba(255,255,255,0.1)'
-        }}
-      >
-        photo story
-      </Typography>
       <Box sx={{ 
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: 2
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2.5
       }}>
-        {images.map((image, index) => (
-          <Box 
-            key={index}
-            sx={{ 
-              gridColumn: image.width === 'full' ? 'span 2' : 'span 1',
-              position: 'relative'
-            }}
-          >
-            <Box
-              component="img"
-              src={image.src}
-              alt=""
-              sx={{
-                width: '100%',
-                height: 'auto',
-                filter: 'grayscale(0.3) contrast(1.1)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                mb: 1
-              }}
-            />
-            <Typography
-              sx={{
-                fontFamily: 'Georgia, serif',
-                fontSize: '0.8rem',
-                fontStyle: 'italic',
-                color: 'rgba(255,255,255,0.7)',
-                borderBottom: '1px dotted rgba(255,255,255,0.1)',
-                pb: 1
+        {images.map((image, index) => {
+          const isFullWidth = image.width === 'full';
+          
+          return (
+            <Box 
+              key={index}
+              sx={{ 
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 1,
+                ...(isFullWidth && {
+                  width: '65%',
+                  mx: 'auto'
+                })
               }}
             >
-              {image.caption}
-            </Typography>
-          </Box>
-        ))}
+              <Box
+                sx={{
+                  position: 'relative',
+                  width: '100%',
+                  '&::after': {
+                    content: '""',
+                    display: 'block',
+                    paddingBottom: image.src === '/1.JPG' ? '133%' : 
+                                 image.src === '/2.JPG' ? '75%' :
+                                 '56.25%',
+                  },
+                  overflow: 'hidden',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                }}
+              >
+                <Box
+                  component="img"
+                  src={image.src}
+                  alt=""
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    filter: 'grayscale(0.3) contrast(1.1)',
+                  }}
+                />
+              </Box>
+              <Typography
+                sx={{
+                  fontFamily: 'Georgia, serif',
+                  fontSize: '0.8rem',
+                  fontStyle: 'italic',
+                  color: 'rgba(255,255,255,0.7)',
+                  textAlign: 'center',
+                  maxWidth: '90%',
+                  mx: 'auto'
+                }}
+              >
+                {image.caption}
+              </Typography>
+              {index < images.length - 1 && (
+                <Divider 
+                  sx={{ 
+                    mt: 1.5,
+                    borderStyle: 'dashed',
+                    borderColor: 'rgba(255,255,255,0.1)' 
+                  }} 
+                />
+              )}
+            </Box>
+          );
+        })}
       </Box>
     </Box>
   );

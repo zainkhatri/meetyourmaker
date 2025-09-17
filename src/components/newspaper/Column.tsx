@@ -11,7 +11,10 @@ const Column = ({ children, width = 1, withDivider = true }: ColumnProps) => {
   return (
     <Box
       sx={{
-        width: { xs: '100%', md: width === 3 ? '75%' : '25%' },
+        width: { 
+          xs: '100%', 
+          md: width === 3 ? '60%' : '40%' // Changed to 60/40 split
+        },
         px: 3,
         position: 'relative',
         '&::after': withDivider ? {
