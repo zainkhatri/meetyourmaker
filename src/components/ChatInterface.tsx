@@ -11,7 +11,7 @@ import {
   ToggleButton,
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
-import { collection, query, getDocs, where } from 'firebase/firestore';
+import { collection, query, getDocs, where, getDocs as getAllDocs } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import openai from '../config/openai';
 import { getPersonaPrompt } from '../config/persona';
@@ -39,7 +39,7 @@ const ChatInterface = () => {
   const [mode, setMode] = useState<'professional' | 'casual'>('professional');
   const [styleSamples, setStyleSamples] = useState<WritingSample[]>([]);
   const [knowledgeSamples, setKnowledgeSamples] = useState<WritingSample[]>([]);
-
+  const [identityCard, setIdentityCard] = useState<string>('');
   // Helper for a mode-specific greeting
   const modeGreeting = (m: 'professional' | 'casual') =>
     m === 'professional'
@@ -86,6 +86,23 @@ const ChatInterface = () => {
           const rawAll = await safeFetchAll('RAW');
           setKnowledgeSamples([...(kcAll || []), ...(rawAll || [])]);
           setStyleSamples(rawAll || []);
+        }
+
+
+        // Fetch identity card (shared across modes). We take the first doc in 'identity'
+        try {
+          const idSnap = await getAllDocs(collection(db, 'identity'));
+          if (!idSnap.empty) {
+            const first = idSnap.docs[0].data() as { bio?: string; name?: string; location?: string; occupation?: string };
+            const parts = [first.name, first.occupation, first.location].filter(Boolean).join(' • ');
+            const combined = [parts, first.bio].filter(Boolean).join('\n');
+            setIdentityCard(combined);
+          } else {
+            setIdentityCard('');
+          }
+        } catch (e) {
+          console.warn('Identity card not found');
+          setIdentityCard('');
         }
       } catch (error) {
         console.error('Error fetching samples:', error);
@@ -136,7 +153,7 @@ const ChatInterface = () => {
       const currentMessages = messagesByMode[mode] || [];
       const styleBlock =
         styleSamples.length > 0
-          ? `Here are examples of Zain's ${mode} writing style:\n\n${styleContext}`
+          ? `Here are examples of Zain's ${mode} writing style (MATCH THIS TONE EXACTLY):\n\n${styleContext}\n\nCRITICAL: For casual mode, you MUST write EXACTLY like these examples. Use the same sentence structure, lowercase style, and exact phrases. Examples of Zain's actual casual style:\n- "honestly just vibing today, might hit up the gym later or just chill at home. been a long week but we made it through"\n- "nah i'm good, just working on some side projects. trying to learn this new framework but it's lowkey confusing at first"\n- "I'm doing good! Lowkey it's been kinda boring since all my friends left back to college or got new jobs. I find myself watching a lot of movies, playing tennis nowadays, and trying to make new friends here and there. I miss my college days sometimes. It was fun waffling in Vela with the lads going skitz here and there. I miss just going up to the lads and goin "what's good shorty" to all of them. I miss just being a figure in the community with influence like that. It's not the same post grad. I love interning at NASA though. It's really cool work, and I hope it will make my career go insane. Fire stuff all around."\n- "We went to this Bazaar at the same mosque we do the ghoosals for, it was mid. We went to Qamaria, applied for some jobs, then we hooped at Mube's. It was hella fun, me and Moz had a good 5 game streak. Just when things started to get a little more exciting, I think it's come to a pause. Sab goes back to SD soon, and I think it would be weird if I asked Ceena to hang w/o her. I didn't really touch on this new found liking for Catan. I went to Ladoo's to talk about Breaking Bad. Jesse!"\n\nWrite in this EXACT style - lowercase, natural, using "lwk", "hella", "bro", "mid", "fire", "yapped", "skitz", "waffling" etc. NEVER use "yo" unless it's "yo whats good shorty". NEVER use "mates" - use "lads" instead. NEVER use "bro" randomly - only in context like "bro I want it after the internship". NO profanity.`
           : `There are currently no saved style examples for this mode. Rely strictly on the baseline persona and maintain a ${mode} tone.`;
 
       const knowledgeBlock =
@@ -149,7 +166,7 @@ const ChatInterface = () => {
         messages: [
           {
             role: "system",
-            content: `${getPersonaPrompt(mode)}\n\n${styleBlock}\n\n${knowledgeBlock}\n\nCritical constraints:\n- Do NOT invent biography details (age, school, city, title) unless present in style or knowledge data.\n- If asked about unknown personal details, reply briefly that it's not available.\n- Keep tone ${mode === 'professional' ? 'professional' : 'casual'} and consistent with style examples.`
+            content: `${getPersonaPrompt(mode)}\n\n${identityCard ? `Identity card (authoritative, do not invent or contradict):\n${identityCard}\n\n` : ''}${styleBlock}\n\n${knowledgeBlock}\n\nCRITICAL RULES - FOLLOW EXACTLY:\n- ONLY use information provided in the knowledge samples and identity card above.\n- If asked about personal details NOT in the samples, say "I don't have that information available."\n- Do NOT invent, assume, or guess any personal details about Zain's activities, hobbies, or interests.\n- Do NOT mention activities like "hitting up the gym" or other things not explicitly stated in the samples.\n- ONLY mention activities, interests, or hobbies that are specifically mentioned in the provided samples.\n- ${mode === 'professional' ? 'Maintain professional tone' : 'For casual mode: Write EXACTLY like the examples provided. Use lowercase, natural sentence structure, and the exact phrases from the samples. Match the tone, energy, and style precisely. Use "lwk", "hella", "bro", "mid", "fire", "yapped", "skitz", "waffling" etc. as shown in the examples. Use "bro" naturally in context like "bro I want it after the internship" not randomly placed. NEVER use "yo" unless it\'s "yo whats good shorty". NEVER use "mates" - use "lads" instead. NO profanity.'}\n- Match the writing style from the examples provided.`
           },
           ...currentMessages.map(msg => ({
             role: msg.role,

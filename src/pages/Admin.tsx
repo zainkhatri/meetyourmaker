@@ -19,7 +19,7 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import { collection, addDoc, getDocs, doc, deleteDoc, updateDoc, query, where } from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, deleteDoc, updateDoc, query, where, setDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { persona } from '../config/persona';
 
@@ -42,12 +42,49 @@ const Admin = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [notification, setNotification] = useState({ message: '', type: 'success' as 'success' | 'error' });
   const [showNotification, setShowNotification] = useState(false);
+  
+  // Identity card state
+  const [identityCard, setIdentityCard] = useState({
+    name: '',
+    occupation: '',
+    location: '',
+    bio: ''
+  });
 
   useEffect(() => {
     if (activeTab === 0) {
       fetchSamples();
+    } else if (activeTab === 2) {
+      fetchIdentityCard();
     }
   }, [viewType, activeTab]);
+
+  const fetchIdentityCard = async () => {
+    try {
+      const idSnap = await getDocs(collection(db, 'identity'));
+      if (!idSnap.empty) {
+        const first = idSnap.docs[0].data();
+        setIdentityCard({
+          name: first.name || '',
+          occupation: first.occupation || '',
+          location: first.location || '',
+          bio: first.bio || ''
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching identity card:', error);
+    }
+  };
+
+  const saveIdentityCard = async () => {
+    try {
+      await setDoc(doc(db, 'identity', 'main'), identityCard);
+      showNotificationMessage('Identity card saved successfully', 'success');
+    } catch (error) {
+      console.error('Error saving identity card:', error);
+      showNotificationMessage('Error saving identity card', 'error');
+    }
+  };
 
   const fetchSamples = async () => {
     try {
@@ -207,6 +244,7 @@ const Admin = () => {
           <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
             <Tab label="Writing Samples" />
             <Tab label="Persona Configuration" />
+            <Tab label="Identity Card" />
           </Tabs>
         </Box>
 
@@ -348,8 +386,63 @@ const Admin = () => {
               </List>
             </Paper>
           </>
-        ) : (
+        ) : activeTab === 1 ? (
           renderPersonaSection()
+        ) : (
+          <Box sx={{ mt: 4 }}>
+            <Typography variant="h5" gutterBottom>
+              Identity Card
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              This is the authoritative information about you that the AI will use. Keep it concise and factual.
+            </Typography>
+
+            <Paper sx={{ p: 3 }}>
+              <TextField
+                fullWidth
+                label="Name"
+                value={identityCard.name}
+                onChange={(e) => setIdentityCard(prev => ({ ...prev, name: e.target.value }))}
+                margin="normal"
+                placeholder="e.g., Zain Khatri"
+              />
+              <TextField
+                fullWidth
+                label="Occupation"
+                value={identityCard.occupation}
+                onChange={(e) => setIdentityCard(prev => ({ ...prev, occupation: e.target.value }))}
+                margin="normal"
+                placeholder="e.g., Software Engineer at NASA"
+              />
+              <TextField
+                fullWidth
+                label="Location"
+                value={identityCard.location}
+                onChange={(e) => setIdentityCard(prev => ({ ...prev, location: e.target.value }))}
+                margin="normal"
+                placeholder="e.g., San Francisco, CA"
+              />
+              <TextField
+                fullWidth
+                label="Bio"
+                multiline
+                rows={3}
+                value={identityCard.bio}
+                onChange={(e) => setIdentityCard(prev => ({ ...prev, bio: e.target.value }))}
+                margin="normal"
+                placeholder="Brief description about yourself..."
+              />
+              <Box sx={{ mt: 2 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={saveIdentityCard}
+                >
+                  Save Identity Card
+                </Button>
+              </Box>
+            </Paper>
+          </Box>
         )}
       </Box>
 
