@@ -219,7 +219,7 @@ const ChatInterface = () => {
         <ToggleButtonGroup
           value={mode}
           exclusive
-          onChange={(e, newValue) => {
+          onChange={(_, newValue) => {
             if (newValue !== null) {
               setMode(newValue);
               setError('');

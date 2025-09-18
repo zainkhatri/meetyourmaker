@@ -58,7 +58,7 @@ const WritingAnalysis = () => {
       });
 
       // Analyze the writing style
-      const analysis = await analyzeWritingStyle(content);
+      await analyzeWritingStyle(content);
 
       setSuccess('Writing sample saved and analyzed successfully!');
       setContent('');

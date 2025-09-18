@@ -8,7 +8,7 @@ interface PhotoStoryProps {
   }[];
 }
 
-const PhotoStory = ({ images }: PhotoStoryProps) => {
+const PhotoStory = ({ }: PhotoStoryProps) => {
   return (
     <Box sx={{ 
       my: 3,

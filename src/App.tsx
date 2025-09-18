@@ -4,13 +4,11 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { Box, Button, Avatar, Typography, Divider } from '@mui/material';
 import ChatInterface from './components/ChatInterface';
 import Admin from './pages/Admin';
-import Headline from './components/newspaper/Headline';
 import Column from './components/newspaper/Column';
 import Article from './components/newspaper/Article';
 import SectionHeader from './components/newspaper/SectionHeader';
 import PullQuote from './components/newspaper/PullQuote';
 import PhotoStory from './components/newspaper/PhotoStory';
-import { analytics } from './config/firebase';
 
 const theme = createTheme({
   palette: {

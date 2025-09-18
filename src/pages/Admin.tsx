@@ -241,7 +241,7 @@ const Admin = () => {
         </Typography>
 
         <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 4 }}>
-          <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
+          <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
             <Tab label="Writing Samples" />
             <Tab label="Persona Configuration" />
             <Tab label="Identity Card" />
@@ -254,7 +254,7 @@ const Admin = () => {
               <ToggleButtonGroup
                 value={viewType}
                 exclusive
-                onChange={(e, newValue) => {
+                onChange={(_, newValue) => {
                   if (newValue !== null) {
                     setViewType(newValue);
                     setType(newValue);
