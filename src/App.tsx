@@ -1,24 +1,13 @@
-import { ThemeProvider, createTheme } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { Box, Button, Avatar, Typography, Divider } from '@mui/material';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Box, Avatar, Typography, Divider } from '@mui/material';
 import ChatInterface from './components/ChatInterface';
-import Admin from './pages/Admin';
 import Column from './components/newspaper/Column';
 import Article from './components/newspaper/Article';
 import SectionHeader from './components/newspaper/SectionHeader';
 import PullQuote from './components/newspaper/PullQuote';
 import PhotoStory from './components/newspaper/PhotoStory';
-
-const theme = createTheme({
-  palette: {
-    mode: 'dark',
-    background: {
-      default: '#121212',
-      paper: '#1a1a1a',
-    },
-  },
-});
+import { ThemeProvider } from './contexts/ThemeContext';
 
 function App() {
   const currentDate = new Date().toLocaleDateString('en-US', {
@@ -29,18 +18,18 @@ function App() {
   });
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider>
       <CssBaseline />
       <Router>
         <Box sx={{ 
           minHeight: '100vh',
-          background: '#121212',
+          backgroundColor: 'background.default',
           pt: 4,
           pb: 8,
           px: { xs: 2, sm: 3, md: 4 }
         }}>
           <Box sx={{ 
-            backgroundColor: '#1a1a1a',
+            backgroundColor: 'background.paper',
             width: '100%',
             position: 'relative',
             '&::before': {
@@ -50,13 +39,14 @@ function App() {
               left: 0,
               right: 0,
               height: '8px',
-              background: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.1) 0px, rgba(255,255,255,0.1) 2px, transparent 2px, transparent 10px)'
+              background: 'repeating-linear-gradient(90deg, divider 0px, divider 2px, transparent 2px, transparent 10px)'
             }
           }}>
             {/* Newspaper Header */}
             <Box sx={{ 
-              borderBottom: '1px solid rgba(255,255,255,0.1)',
-              background: '#161616'
+              borderBottom: '1px solid',
+              borderColor: 'divider',
+              backgroundColor: 'background.paper'
             }}>
               <Box sx={{ 
                 textAlign: 'center', 
@@ -67,7 +57,7 @@ function App() {
                   sx={{ 
                     fontSize: '0.8rem',
                     letterSpacing: '0.2em',
-                    color: 'rgba(255,255,255,0.6)',
+                    color: 'text.secondary',
                     mb: 1,
                     fontFamily: 'Georgia, serif',
                     textTransform: 'uppercase'
@@ -77,8 +67,8 @@ function App() {
                 </Typography>
                 
                 <Box sx={{ 
-                  borderBottom: '4px double rgba(255,255,255,0.1)',
-                  borderTop: '4px double rgba(255,255,255,0.1)',
+                  borderBottom: '4px double divider',
+                  borderTop: '4px double divider',
                   py: 3,
                   my: 2
                 }}>
@@ -100,9 +90,10 @@ function App() {
                       fontFamily: 'Georgia, serif',
                       fontSize: '1.2rem',
                       fontStyle: 'italic',
-                      color: 'rgba(255,255,255,0.7)',
-                      borderTop: '1px solid rgba(255,255,255,0.1)',
-                      borderBottom: '1px solid rgba(255,255,255,0.1)',
+                      color: 'text.secondary',
+                      borderTop: '1px solid',
+                      borderBottom: '1px solid',
+                      borderColor: 'divider',
                       py: 1,
                       mx: 'auto',
                       maxWidth: '600px'
@@ -116,9 +107,9 @@ function App() {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  borderBottom: '1px solid rgba(255,255,255,0.1)',
+                  borderBottom: '1px solid divider',
                   pb: 2,
-                  color: 'rgba(255,255,255,0.7)',
+                  color: 'text.secondary',
                   fontFamily: 'Georgia, serif'
                 }}>
                   <Box sx={{ 
@@ -131,7 +122,7 @@ function App() {
                       letterSpacing: '0.05em',
                       fontStyle: 'italic',
                       '&:hover': {
-                        color: 'white'
+                        color: 'primary.main'
                       }
                     }
                   }}>
@@ -159,7 +150,6 @@ function App() {
             {/* Main Content */}
             <Box sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
               <Routes>
-                <Route path="/admin" element={<Admin />} />
                 <Route path="/" element={
                   <Box sx={{ 
                     display: 'flex',
@@ -174,7 +164,7 @@ function App() {
                         flexDirection: { xs: 'column', md: 'row' },
                         gap: 3, 
                         mb: 4,
-                        borderBottom: '2px solid rgba(255,255,255,0.1)',
+                        borderBottom: '2px solid divider',
                         pb: 4
                       }}>
                         <Avatar 
@@ -182,7 +172,7 @@ function App() {
                           sx={{ 
                             width: { xs: 100, md: 120 }, 
                             height: { xs: 100, md: 120 },
-                            border: '3px solid rgba(255,255,255,0.1)'
+                            border: '3px solid divider'
                           }}
                         />
                         <Box sx={{ textAlign: { xs: 'center', md: 'left' } }}>
@@ -201,7 +191,7 @@ function App() {
                             sx={{
                               fontFamily: 'Georgia, serif',
                               fontSize: '1rem',
-                              color: 'rgba(255,255,255,0.7)',
+                              color: 'text.secondary',
                               fontStyle: 'italic'
                             }}
                           >
@@ -222,9 +212,10 @@ function App() {
                     {/* Sidebar */}
                     <Column width={1} withDivider={false}>
                       <Box sx={{
-                        border: '1px solid rgba(255,255,255,0.1)',
+                        border: '1px solid',
+                        borderColor: 'divider',
                         p: 3,
-                        backgroundColor: 'rgba(26,26,26,0.5)',
+                        backgroundColor: 'background.paper',
                         position: 'relative',
                         '&::before': {
                           content: '""',
@@ -233,7 +224,7 @@ function App() {
                           left: 0,
                           right: 0,
                           height: '4px',
-                          background: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.1) 0px, rgba(255,255,255,0.1) 1px, transparent 1px, transparent 5px)'
+                          background: 'repeating-linear-gradient(90deg, divider 0px, divider 1px, transparent 1px, transparent 5px)'
                         }
                       }}>
                         <SectionHeader title="about zain" />
@@ -244,7 +235,7 @@ function App() {
                         <Divider sx={{ 
                           my: 3, 
                           borderStyle: 'dashed',
-                          borderColor: 'rgba(255,255,255,0.1)' 
+                          borderColor: 'divider' 
                         }} />
                         <Article
                           content="The system maintains Zain's dual communication modes: his professional voice honed through research and engineering work, and his casual tone from everyday interactions. Each response is crafted to authentically represent his communication style, creating a genuine digital extension of his personality."
@@ -253,7 +244,7 @@ function App() {
                         <Divider sx={{ 
                           my: 3, 
                           borderStyle: 'dashed',
-                          borderColor: 'rgba(255,255,255,0.1)' 
+                          borderColor: 'divider' 
                         }} />
                         <SectionHeader title="visual chronicle" />
                         <PhotoStory 
@@ -280,26 +271,6 @@ function App() {
                             }
                           ]} 
                         />
-                        <Box sx={{ mt: 4, textAlign: 'center' }}>
-                          <Button
-                            component={Link}
-                            to={window.location.pathname === '/admin' ? '/' : '/admin'}
-                            variant="outlined"
-                            sx={{
-                              fontFamily: 'Georgia, serif',
-                              textTransform: 'none',
-                              borderColor: 'rgba(255,255,255,0.2)',
-                              borderStyle: 'double',
-                              borderWidth: '3px',
-                              '&:hover': {
-                                borderColor: 'rgba(255,255,255,0.4)',
-                                backgroundColor: 'rgba(255,255,255,0.05)'
-                              }
-                            }}
-                          >
-                            {window.location.pathname === '/admin' ? 'return to chat' : 'configure system'}
-                          </Button>
-                        </Box>
                       </Box>
                     </Column>
                   </Box>

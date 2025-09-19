@@ -9,12 +9,16 @@ import {
   ListItem,
   ToggleButtonGroup,
   ToggleButton,
+  IconButton,
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
 import { collection, query, getDocs, where, getDocs as getAllDocs } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import openai from '../config/openai';
 import { getPersonaPrompt } from '../config/persona';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -29,6 +33,7 @@ interface WritingSample {
 }
 
 const ChatInterface = () => {
+  const { isDarkMode, toggleTheme } = useTheme();
   const [messagesByMode, setMessagesByMode] = useState<{
     professional: Message[];
     casual: Message[];
@@ -43,7 +48,7 @@ const ChatInterface = () => {
   // Helper for a mode-specific greeting
   const modeGreeting = (m: 'professional' | 'casual') =>
     m === 'professional'
-      ? "hello — how can I assist you today?"
+      ? "Hello! I'm Zain, how are you doing?"
       : "hey, what's up! i'm zain";
 
   // Set a friendly, mode-specific default greeting once on initial mount
@@ -202,8 +207,9 @@ const ChatInterface = () => {
         display: 'flex', 
         alignItems: 'center',
         justifyContent: 'space-between',
-        borderTop: '1px solid rgba(255,255,255,0.1)',
-        borderBottom: '1px solid rgba(255,255,255,0.1)',
+        borderTop: '1px solid',
+        borderBottom: '1px solid',
+        borderColor: 'divider',
         py: 2
       }}>
         <Typography
@@ -216,7 +222,11 @@ const ChatInterface = () => {
         >
           {mode === 'professional' ? 'professional discourse' : 'casual conversation'}
         </Typography>
-        <ToggleButtonGroup
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <IconButton onClick={toggleTheme} sx={{ color: 'text.primary' }}>
+            {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
+          </IconButton>
+          <ToggleButtonGroup
           value={mode}
           exclusive
           onChange={(_, newValue) => {
@@ -228,16 +238,16 @@ const ChatInterface = () => {
           sx={{
             '& .MuiToggleButton-root': {
               fontFamily: 'Georgia, serif',
-              color: 'rgba(255,255,255,0.7)',
-              borderColor: 'rgba(255,255,255,0.1)',
+              color: 'text.secondary',
+              borderColor: 'divider',
               px: 3,
               py: 1,
               textTransform: 'lowercase',
               fontSize: '0.9rem',
               letterSpacing: '0.02em',
               '&.Mui-selected': {
-                backgroundColor: 'rgba(255,255,255,0.1)',
-                color: 'white',
+                backgroundColor: 'text.primary',
+                color: 'background.paper',
               },
             },
           }}
@@ -249,6 +259,7 @@ const ChatInterface = () => {
             casual
           </ToggleButton>
         </ToggleButtonGroup>
+        </Box>
       </Box>
 
       {error && (
@@ -257,7 +268,7 @@ const ChatInterface = () => {
             mb: 2, 
             textAlign: 'center',
             fontFamily: 'Georgia, serif',
-            color: '#ff6b6b',
+            color: 'error.main',
             p: 2,
           }}
         >
@@ -271,15 +282,16 @@ const ChatInterface = () => {
           overflow: 'auto',
           backgroundColor: 'transparent',
           mb: 3,
-          border: '1px solid rgba(255,255,255,0.1)',
+          border: '1px solid',
+          borderColor: 'divider',
           '&::-webkit-scrollbar': {
             width: '8px',
           },
           '&::-webkit-scrollbar-track': {
-            backgroundColor: 'rgba(255,255,255,0.05)',
+            backgroundColor: 'action.hover',
           },
           '&::-webkit-scrollbar-thumb': {
-            backgroundColor: 'rgba(255,255,255,0.1)',
+            backgroundColor: 'divider',
             borderRadius: '4px',
           },
         }}
@@ -300,9 +312,10 @@ const ChatInterface = () => {
                   p: 2,
                   maxWidth: '80%',
                   backgroundColor: message.role === 'user' ? 
-                    'rgba(255,255,255,0.05)' : 
-                    'rgba(255,255,255,0.1)',
-                  border: '1px solid rgba(255,255,255,0.1)',
+                    'action.hover' : 
+                    'divider',
+                  border: '1px solid',
+          borderColor: 'divider',
                 }}
               >
                 <Typography 
@@ -322,7 +335,7 @@ const ChatInterface = () => {
             <ListItem sx={{ justifyContent: 'center' }}>
               <Typography 
                 sx={{ 
-                  color: 'rgba(255,255,255,0.5)',
+                  color: 'text.disabled',
                   fontFamily: 'Georgia, serif',
                   fontStyle: 'italic',
                 }}
@@ -342,7 +355,8 @@ const ChatInterface = () => {
           gap: 2,
           p: 2,
           backgroundColor: 'transparent',
-          border: '1px solid rgba(255,255,255,0.1)',
+          border: '1px solid',
+          borderColor: 'divider',
         }}
       >
         <TextField
@@ -356,15 +370,15 @@ const ChatInterface = () => {
           sx={{
             '& .MuiOutlinedInput-root': {
               fontFamily: 'Georgia, serif',
-              backgroundColor: 'rgba(255,255,255,0.05)',
+              backgroundColor: 'action.hover',
               '& fieldset': {
-                borderColor: 'rgba(255,255,255,0.1)',
+                borderColor: 'divider',
               },
               '&:hover fieldset': {
-                borderColor: 'rgba(255,255,255,0.2)',
+                borderColor: 'divider',
               },
               '&.Mui-focused fieldset': {
-                borderColor: 'rgba(255,255,255,0.3)',
+                borderColor: 'divider',
               },
             },
           }}
@@ -377,10 +391,10 @@ const ChatInterface = () => {
           sx={{
             fontFamily: 'Georgia, serif',
             textTransform: 'lowercase',
-            borderColor: 'rgba(255,255,255,0.2)',
+            borderColor: 'divider',
             '&:hover': {
-              borderColor: 'rgba(255,255,255,0.4)',
-              backgroundColor: 'rgba(255,255,255,0.05)',
+              borderColor: 'divider',
+              backgroundColor: 'action.hover',
             },
           }}
         >

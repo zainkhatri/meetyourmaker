@@ -57,7 +57,8 @@ const PhotoStory = ({ }: PhotoStoryProps) => {
                 paddingBottom: image.ratio,
               },
               overflow: 'hidden',
-              border: '1px solid rgba(255,255,255,0.1)',
+              border: '1px solid',
+              borderColor: 'divider',
             }}
           >
             <Box
@@ -80,7 +81,7 @@ const PhotoStory = ({ }: PhotoStoryProps) => {
               fontFamily: 'Georgia, serif',
               fontSize: '0.8rem',
               fontStyle: 'italic',
-              color: 'rgba(255,255,255,0.7)',
+              color: 'text.secondary',
               textAlign: 'left',
             }}
           >

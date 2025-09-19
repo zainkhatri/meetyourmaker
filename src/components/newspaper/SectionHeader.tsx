@@ -8,8 +8,9 @@ const SectionHeader = ({ title }: SectionHeaderProps) => {
   return (
     <Box
       sx={{
-        borderTop: '2px solid rgba(255,255,255,0.2)',
-        borderBottom: '2px solid rgba(255,255,255,0.2)',
+        borderTop: '2px solid',
+        borderBottom: '2px solid',
+        borderColor: 'divider',
         py: 1,
         my: 4,
         textAlign: 'center',

@@ -24,7 +24,8 @@ const Headline = ({ main, subheading, size = 'medium' }: HeadlineProps) => {
 
   return (
     <Box sx={{ 
-      borderBottom: subheading ? 'none' : '2px solid rgba(255,255,255,0.1)',
+      borderBottom: subheading ? 'none' : '2px solid',
+      borderColor: subheading ? 'transparent' : 'divider',
       mb: subheading ? 1 : 3,
       pb: subheading ? 0 : 2
     }}>
@@ -47,7 +48,7 @@ const Headline = ({ main, subheading, size = 'medium' }: HeadlineProps) => {
             fontFamily: 'Georgia, serif',
             fontSize: '1.2rem',
             fontStyle: 'italic',
-            color: 'rgba(255,255,255,0.7)',
+            color: 'text.secondary',
             textTransform: 'lowercase',
           }}
         >

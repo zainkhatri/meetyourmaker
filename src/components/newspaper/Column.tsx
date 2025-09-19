@@ -24,7 +24,7 @@ const Column = ({ children, width = 1, withDivider = true }: ColumnProps) => {
           top: '5%',
           height: '90%',
           width: '1px',
-          backgroundColor: 'rgba(255,255,255,0.1)',
+          backgroundColor: 'action.hover',
           display: { xs: 'none', md: 'block' }
         } : {},
       }}

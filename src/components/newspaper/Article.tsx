@@ -18,7 +18,8 @@ const Article = ({ content, byline, date }: ArticleProps) => {
           mb: 2,
           display: 'flex',
           justifyContent: 'space-between',
-          borderBottom: '1px solid rgba(255,255,255,0.1)',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
           pb: 1
         }}>
           {byline && (
@@ -26,7 +27,7 @@ const Article = ({ content, byline, date }: ArticleProps) => {
               sx={{
                 fontFamily: 'Playfair Display, Georgia, serif',
                 fontSize: '0.9rem',
-                color: 'rgba(255,255,255,0.7)',
+                color: 'text.secondary',
                 fontStyle: 'italic',
                 textTransform: 'lowercase'
               }}
@@ -39,7 +40,7 @@ const Article = ({ content, byline, date }: ArticleProps) => {
               sx={{
                 fontFamily: 'Playfair Display, Georgia, serif',
                 fontSize: '0.9rem',
-                color: 'rgba(255,255,255,0.7)',
+                color: 'text.secondary',
                 fontStyle: 'italic'
               }}
             >

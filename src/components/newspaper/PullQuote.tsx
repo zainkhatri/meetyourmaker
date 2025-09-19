@@ -10,11 +10,12 @@ const PullQuote = ({ quote, attribution }: PullQuoteProps) => {
   return (
     <Box
       sx={{
-        backgroundColor: 'rgba(255,255,255,0.05)',
+        backgroundColor: 'action.hover',
         p: 3,
         my: 4,
         position: 'relative',
-        borderLeft: '3px solid rgba(255,255,255,0.2)',
+        borderLeft: '3px solid',
+        borderLeftColor: 'divider',
       }}
     >
       <FormatQuoteIcon
@@ -23,7 +24,7 @@ const PullQuote = ({ quote, attribution }: PullQuoteProps) => {
           top: -20,
           left: -20,
           fontSize: '3rem',
-          color: 'rgba(255,255,255,0.2)',
+          color: 'divider',
           transform: 'rotate(180deg)',
         }}
       />
@@ -43,7 +44,7 @@ const PullQuote = ({ quote, attribution }: PullQuoteProps) => {
           sx={{
             fontFamily: 'Arial, sans-serif',
             fontSize: '0.9rem',
-            color: 'rgba(255,255,255,0.7)',
+            color: 'text.secondary',
             textAlign: 'right',
           }}
         >
